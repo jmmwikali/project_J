@@ -6,7 +6,7 @@
 
 const { useState, useEffect, useCallback } = React;
 
-const API_BASE = 'https://agrovet-api.onrender.com';
+const API_BASE = 'https://project-b-35y2.onrender.com';
 
 // ── API helper ────────────────────────────────────────────────
 async function api(path, options = {}) {
