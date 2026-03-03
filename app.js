@@ -155,7 +155,7 @@ function AgrovetApp() {
   const [expenses,    setExpenses]    = useState([]);
   const [users,       setUsers]       = useState([]);
   const [categories,  setCategories]  = useState([]);
-  const [businessInfo] = useState({ name: 'Green Acres Agrovet', location: 'Nakuru, Kenya' });
+  const [businessInfo] = useState({ name: 'Macys Agrofeeds', location: 'Machakos, Kenya' });
   const [notification, setNotification] = useState(null);
   const [modal,  setModal]  = useState(null);
   const [loading, setLoading] = useState(false);
