@@ -583,6 +583,15 @@ function Dashboard({ inventory, sales, expenses, lowStockItems, outOfStock,
 // ============================================================
 // INVENTORY PAGE
 // ============================================================
+const InpF = ({ label, field, type='text', obj, setObj }) => (
+    <div style={{ marginBottom:12 }}>
+      <label style={{ fontSize:12, fontWeight:600, color:'#444', display:'block', marginBottom:4 }}>{label}</label>
+      <input type={type} value={obj[field]||''} onChange={e=>setObj(p=>({...p,[field]:e.target.value}))}
+             style={{ width:'100%', padding:'8px 11px', borderRadius:7, border:'1.5px solid #ddd',
+                      fontSize:13, boxSizing:'border-box' }}/>
+    </div>
+  );
+
 function InventoryPage({ inventory, categories, isAdmin, onUpdate, onAdd, onDelete,
                          onRestock, onAdjust, showNotif, setModal }) {
   const [search,      setSearch]      = useState('');
@@ -693,14 +702,6 @@ function InventoryPage({ inventory, categories, isAdmin, onUpdate, onAdd, onDele
     );
   };
 
-  const InpF = ({ label, field, type='text', obj, setObj }) => (
-    <div style={{ marginBottom:12 }}>
-      <label style={{ fontSize:12, fontWeight:600, color:'#444', display:'block', marginBottom:4 }}>{label}</label>
-      <input type={type} value={obj[field]||''} onChange={e=>setObj(p=>({...p,[field]:e.target.value}))}
-             style={{ width:'100%', padding:'8px 11px', borderRadius:7, border:'1.5px solid #ddd',
-                      fontSize:13, boxSizing:'border-box' }}/>
-    </div>
-  );
 
   return (
     <div>
