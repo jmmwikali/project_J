@@ -986,8 +986,8 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
       <div style={{ background:'#fff', borderRadius:12, padding:28, boxShadow:'0 2px 20px rgba(0,0,0,0.1)',
                     fontFamily:'monospace', fontSize:13 }}>
         <div style={{ textAlign:'center', marginBottom:14 }}>
-          <div style={{ fontSize:16, fontWeight:800 }}>🌱 GREEN ACRES AGROVET</div>
-          <div style={{ color:'#666' }}>Nakuru, Kenya</div>
+          <div style={{ fontSize:16, fontWeight:800 }}>🌱 MACY'S AGROFEEDS</div>
+          <div style={{ color:'#666' }}>Machakos, Kenya</div>
           <div style={{ borderTop:'1px dashed #ccc', margin:'8px 0' }}/>
           <div>Date: {viewReceipt.date}  {viewReceipt.time}</div>
           <div>Receipt: {viewReceipt.receipt_number}</div>
