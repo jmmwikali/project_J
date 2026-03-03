@@ -322,8 +322,8 @@ function AgrovetApp() {
             <div style={{ width:36, height:36, borderRadius:8, background:'#4caf50',
                           display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>🌱</div>
             <div>
-              <div style={{ fontWeight:700, fontSize:13, color:'#fff', lineHeight:1.2 }}>{businessInfo.name}</div>
-              <div style={{ fontSize:10, color:'#81c784' }}>{businessInfo.location}</div>
+              <div style={{ fontWeight:700, fontSize:13, color:'#fff', lineHeight:1.2 }}>Macy's Agrofeeds</div>
+              <div style={{ fontSize:10, color:'#81c784' }}>Machakos, Kenya</div>
             </div>
           </div>
         </div>
