@@ -1074,7 +1074,8 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
     <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 340px', gap: isMobile ? 12 : 20, alignItems:'start' }}>
       <div>
         <div style={{ background:'#fff', borderRadius:12, padding:20,
-                      boxShadow:'0 1px 8px rgba(0,0,0,0.06)' }}>
+                      boxShadow:'0 1px 8px rgba(0,0,0,0.06)',
+                      maxHeight: isMobile ? 420 : 'none', overflowY: isMobile ? 'auto' : 'visible' }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
             <h3 style={{ margin:0, fontSize:15, fontWeight:700, color:'#1a3a2a' }}>Sales History</h3>
             <input type="date" value={dateFilter} onChange={e=>setDateFilter(e.target.value)}
@@ -1085,17 +1086,32 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
             const tr = ts.reduce((a,s)=>a+s.total_amount,0);
             const tp = ts.reduce((a,s)=>a+s.total_profit,0);
             return ts.length>0 ? (
-              <div style={{ display:'flex', gap: isMobile ? 6 : 10, marginBottom:14 }}>
-                {[["Today's Revenue",fmt(tr),'#e3f2fd','#1565c0'],
-                  ["Today's Profit", fmt(tp),'#e8f5e9','#2e7d32'],
-                  ["Today's Sales",  ts.length,'#f3e5f5','#6a1b9a']
-                ].map(([l,v,bg,c])=>(
-                  <div key={l} style={{ flex:1, background:bg, borderRadius:8, padding: isMobile ? '8px 8px' : '10px 14px' }}>
-                    <div style={{ fontSize: isMobile ? 9 : 10, color:'#666' }}>{l}</div>
-                    <div style={{ fontWeight:800, color:c, fontSize: isMobile ? 13 : 16 }}>{v}</div>
-                  </div>
-                ))}
-              </div>
+              isMobile ? (
+                <div style={{ display:'grid', gridTemplateColumns:'1fr', gap:8, marginBottom:14 }}>
+                  {[["Today's Revenue",fmt(tr),'#e3f2fd','#1565c0'],
+                    ["Today's Profit", fmt(tp),'#e8f5e9','#2e7d32'],
+                    ["Today's Sales",  ts.length,'#f3e5f5','#6a1b9a']
+                  ].map(([l,v,bg,c])=>(
+                    <div key={l} style={{ background:bg, borderRadius:8, padding:'10px 14px',
+                                         display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                      <div style={{ fontSize:12, color:'#666' }}>{l}</div>
+                      <div style={{ fontWeight:800, color:c, fontSize:15 }}>{v}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ display:'flex', gap:10, marginBottom:14 }}>
+                  {[["Today's Revenue",fmt(tr),'#e3f2fd','#1565c0'],
+                    ["Today's Profit", fmt(tp),'#e8f5e9','#2e7d32'],
+                    ["Today's Sales",  ts.length,'#f3e5f5','#6a1b9a']
+                  ].map(([l,v,bg,c])=>(
+                    <div key={l} style={{ flex:1, background:bg, borderRadius:8, padding:'10px 14px' }}>
+                      <div style={{ fontSize:10, color:'#666' }}>{l}</div>
+                      <div style={{ fontWeight:800, color:c, fontSize:16 }}>{v}</div>
+                    </div>
+                  ))}
+                </div>
+              )
             ) : null;
           })()}
           <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
@@ -1139,7 +1155,8 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
       {/* Cart */}
       <div>
         <div style={{ background:'#fff', borderRadius:12, padding: isMobile ? 14 : 20,
-                      boxShadow:'0 1px 8px rgba(0,0,0,0.06)', position: isMobile ? 'static' : 'sticky', top:80 }}>
+                      boxShadow:'0 1px 8px rgba(0,0,0,0.06)', position: isMobile ? 'static' : 'sticky',
+                      top:80, width:'100%', boxSizing:'border-box', overflowX:'hidden' }}>
           <h3 style={{ margin:'0 0 14px', fontSize:15, fontWeight:700, color:'#1a3a2a' }}>🛒 New Sale</h3>
           <div style={{ position:'relative', marginBottom:14 }}>
             <input value={searchItem} onChange={e=>setSearchItem(e.target.value)}
