@@ -498,8 +498,8 @@ function Dashboard({ inventory, sales, expenses, lowStockItems, outOfStock,
   );
 
   return (
-    <div style={{ maxWidth:'100%', overflowX:'hidden' }}>
-      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit,minmax(200px,1fr))', gap: isMobile ? 10 : 16, marginBottom: isMobile ? 14 : 24 }}>
+    <div style={{ maxWidth:'100%', overflowX:'hidden', width:'100%' }}>
+      <div style={{ display:'grid', gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(auto-fit,minmax(200px,1fr))', gap: window.innerWidth < 768 ? 10 : 16, marginBottom: window.innerWidth < 768 ? 14 : 24 }}>
         <StatCard label="Total Revenue" value={fmt(totalRevenue)} icon="sales" color="#1565c0" sub="All recorded sales"/>
         <StatCard label="Gross Profit" value={fmt(totalProfit)} icon="reports" color="#2e7d32"
                   sub={`Margin: ${totalRevenue ? ((totalProfit/totalRevenue)*100).toFixed(1) : 0}%`}/>
