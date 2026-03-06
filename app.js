@@ -315,7 +315,7 @@ function AgrovetApp() {
   return (
     <div style={{ display:'flex', minHeight:'100vh', background:'#f0f4f0', fontFamily:"'Lato','Segoe UI',sans-serif" }}>
       {/* ── Sidebar ── */}
-      <aside style={{ width:220, background:'linear-gradient(180deg,#1a3a2a,#0d2118)', color:'#fff',
+      <aside id="mobile-nav" style={{ width:220, background:'linear-gradient(180deg,#1a3a2a,#0d2118)', color:'#fff',
                       display:'flex', flexDirection:'column', position:'fixed', height:'100vh', zIndex:100 }}>
         <div style={{ padding:'24px 20px 16px', borderBottom:'1px solid rgba(255,255,255,0.1)' }}>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
@@ -369,9 +369,9 @@ function AgrovetApp() {
       </aside>
 
       {/* ── Main content ── */}
-      <main style={{ flex:1, marginLeft:220, minHeight:'100vh' }}>
+      <main id="main-content" style={{ flex:1, marginLeft:220, minHeight:'100vh' }}>
         {/* Topbar */}
-        <div style={{ background:'#fff', padding:'14px 28px', display:'flex', alignItems:'center',
+        <div id="topbar" style={{ background:'#fff', padding:'14px 28px', display:'flex', alignItems:'center',
                       justifyContent:'space-between', borderBottom:'1px solid #e8f0e8',
                       position:'sticky', top:0, zIndex:50 }}>
           <div style={{ fontSize:18, fontWeight:700, color:'#1a3a2a' }}>
