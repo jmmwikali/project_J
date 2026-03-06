@@ -456,7 +456,7 @@ function AgrovetApp() {
           </div>
         )}
 
-        <div style={{ padding: isMobile ? '14px' : '24px 28px' }}>{renderPage()}</div>
+        <div style={{ padding: isMobile ? '10px' : '24px 28px', overflowX:'hidden', width:'100%', boxSizing:'border-box' }}>{renderPage()}</div>
       </main>
     </div>
   );
@@ -1071,11 +1071,12 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
   );
 
   return (
-    <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 340px', gap: isMobile ? 12 : 20, alignItems:'start' }}>
+    <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 340px', gap: isMobile ? 12 : 20, alignItems:'start', width:'100%', boxSizing:'border-box' }}>
       <div>
-        <div style={{ background:'#fff', borderRadius:12, padding:20,
+        <div style={{ background:'#fff', borderRadius:12, padding: isMobile ? '14px 12px' : 20,
                       boxShadow:'0 1px 8px rgba(0,0,0,0.06)',
-                      maxHeight: isMobile ? 500 : 'none', overflowY: isMobile ? 'auto' : 'visible' }}>
+                      maxHeight: isMobile ? 500 : 'none', overflowY: isMobile ? 'auto' : 'visible',
+                      width:'100%', boxSizing:'border-box', overflowX:'hidden' }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
             <h3 style={{ margin:0, fontSize:15, fontWeight:700, color:'#1a3a2a' }}>Sales History</h3>
             <input type="date" value={dateFilter} onChange={e=>setDateFilter(e.target.value)}
@@ -1115,7 +1116,7 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
             ) : null;
           })()}
           <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
-            <table style={{ width:'100%', borderCollapse:'collapse', fontSize: isMobile ? 11 : 13, minWidth: isMobile ? 420 : 'auto' }}>
+            <table style={{ width:'100%', borderCollapse:'collapse', fontSize: isMobile ? 11 : 13, minWidth: isMobile ? 340 : 'auto' }}>
               <thead><tr style={{ background:'#f5f5f5' }}>
                 {['Date','Items','Amount','Profit',''].map(h=>
                   <th key={h} style={{ padding: isMobile ? '7px 8px' : '9px 12px', textAlign:'left', fontWeight:700, color:'#444', fontSize: isMobile ? 10 : 12 }}>{h}</th>)}
@@ -1154,9 +1155,9 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
 
       {/* Cart */}
       <div>
-        <div style={{ background:'#fff', borderRadius:12, padding: isMobile ? 14 : 20,
+        <div style={{ background:'#fff', borderRadius:12, padding: isMobile ? '14px 12px' : 20,
                       boxShadow:'0 1px 8px rgba(0,0,0,0.06)', position: isMobile ? 'static' : 'sticky',
-                      top:80, width:'100%', boxSizing:'border-box', overflowX:'hidden' }}>
+                      top:80, width:'100%', boxSizing:'border-box', overflowX:'hidden', minWidth:0 }}>
           <h3 style={{ margin:'0 0 14px', fontSize:15, fontWeight:700, color:'#1a3a2a' }}>🛒 New Sale</h3>
           <div style={{ position:'relative', marginBottom:14 }}>
             <input value={searchItem} onChange={e=>setSearchItem(e.target.value)}
