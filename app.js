@@ -403,7 +403,7 @@ function AgrovetApp() {
       </aside>
 
       {/* ── Main content ── */}
-      <main id="main-content" style={{ flex:1, marginLeft: isMobile ? 0 : 220, marginBottom: isMobile ? 60 : 0, minHeight:'100vh', transition:'all 0.25s ease' }}>
+      <main id="main-content" style={{ flex:1, marginLeft: isMobile ? 0 : 220, marginBottom: isMobile ? 60 : 0, minHeight: isMobile ? 'unset' : '100vh', transition:'all 0.25s ease' }}>
         {/* Topbar */}
         <div id="topbar" style={{ background:'#fff', padding: isMobile ? '10px 14px' : '14px 28px', display:'flex', alignItems:'center',
                       justifyContent:'space-between', borderBottom:'1px solid #e8f0e8',
@@ -590,28 +590,29 @@ function Dashboard({ inventory, sales, expenses, lowStockItems, outOfStock,
         <h3 style={{ margin:'0 0 14px', fontSize:14, fontWeight:700, color:'#1a3a2a' }}>Recent Sales</h3>
         {sales.length === 0
           ? <div style={{ color:'#aaa', fontSize:13 }}>No sales recorded yet.</div>
-          : <div style={{ overflowX: isMobile ? 'auto' : 'visible' }}>
-              <table style={{ width:'100%', borderCollapse:'collapse', fontSize: isMobile ? 11 : 13, minWidth: isMobile ? 0 : 'auto' }}>
+            : <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
+              <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13, minWidth:380 }}>
                 <thead>
                   <tr style={{ background:'#f5f5f5' }}>
-                    {(isMobile ? ['Date','Items','Rev','Profit'] : ['Date','Items','Revenue','Profit']).map(h =>
-                      <th key={h} style={{ padding: isMobile ? '6px 6px' : '8px 12px', textAlign:'left', fontWeight:600, color:'#555', fontSize: isMobile ? 10 : 12 }}>{h}</th>)}
+                    {['Date','Items','Revenue','Profit'].map(h =>
+                      <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontWeight:600, color:'#555', fontSize:12, whiteSpace:'nowrap' }}>{h}</th>)}
                   </tr>
                 </thead>
                 <tbody>
                   {[...sales].slice(0,5).map(s => (
                     <tr key={s.id} style={{ borderBottom:'1px solid #f0f0f0' }}>
-                      <td style={{ padding: isMobile ? '7px 6px' : '10px 12px', color:'#666', fontSize: isMobile ? 10 : 13, whiteSpace:'nowrap' }}>{isMobile ? s.date.substring(5) : s.date}</td>
-                      <td style={{ padding: isMobile ? '7px 6px' : '10px 12px', color:'#333', fontSize: isMobile ? 10 : 12, maxWidth: isMobile ? 90 : 'none', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                        {(s.items||[]).map(i=>i.name).join(', ').substring(0, isMobile ? 20 : 50)}
+                      <td style={{ padding:'10px 8px', color:'#666', whiteSpace:'nowrap', fontSize:12 }}>{s.date}</td>
+                      <td style={{ padding:'10px 8px', color:'#333', fontSize:11, maxWidth:120, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                        {(s.items||[]).map(i=>i.name).join(', ').substring(0,40)}
                       </td>
-                      <td style={{ padding: isMobile ? '7px 6px' : '10px 12px', fontWeight:600, color:'#1565c0', fontSize: isMobile ? 10 : 13, whiteSpace:'nowrap' }}>{isMobile ? fmt(s.total_amount).replace('KSh','') : fmt(s.total_amount)}</td>
-                      <td style={{ padding: isMobile ? '7px 6px' : '10px 12px', fontWeight:600, color:'#2e7d32', fontSize: isMobile ? 10 : 13, whiteSpace:'nowrap' }}>{isMobile ? fmt(s.total_profit).replace('KSh','') : fmt(s.total_profit)}</td>
+                      <td style={{ padding:'10px 8px', fontWeight:600, color:'#1565c0', whiteSpace:'nowrap', fontSize:12 }}>{fmt(s.total_amount)}</td>
+                      <td style={{ padding:'10px 8px', fontWeight:600, color:'#2e7d32', whiteSpace:'nowrap', fontSize:12 }}>{fmt(s.total_profit)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>}
+          
       </div>
     </div>
   );
@@ -1070,7 +1071,7 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
   );
 
   return (
-    <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 340px', gap: isMobile ? 12 : 20 }}>
+    <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 340px', gap: isMobile ? 12 : 20, alignItems:'start' }}>
       <div>
         <div style={{ background:'#fff', borderRadius:12, padding:20,
                       boxShadow:'0 1px 8px rgba(0,0,0,0.06)' }}>
@@ -1084,14 +1085,14 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
             const tr = ts.reduce((a,s)=>a+s.total_amount,0);
             const tp = ts.reduce((a,s)=>a+s.total_profit,0);
             return ts.length>0 ? (
-              <div style={{ display:'flex', gap:10, marginBottom:14 }}>
+              <div style={{ display:'flex', gap: isMobile ? 6 : 10, marginBottom:14 }}>
                 {[["Today's Revenue",fmt(tr),'#e3f2fd','#1565c0'],
                   ["Today's Profit", fmt(tp),'#e8f5e9','#2e7d32'],
                   ["Today's Sales",  ts.length,'#f3e5f5','#6a1b9a']
                 ].map(([l,v,bg,c])=>(
-                  <div key={l} style={{ flex:1, background:bg, borderRadius:8, padding:'10px 14px' }}>
-                    <div style={{ fontSize:10, color:'#666' }}>{l}</div>
-                    <div style={{ fontWeight:800, color:c, fontSize:16 }}>{v}</div>
+                  <div key={l} style={{ flex:1, background:bg, borderRadius:8, padding: isMobile ? '8px 8px' : '10px 14px' }}>
+                    <div style={{ fontSize: isMobile ? 9 : 10, color:'#666' }}>{l}</div>
+                    <div style={{ fontWeight:800, color:c, fontSize: isMobile ? 13 : 16 }}>{v}</div>
                   </div>
                 ))}
               </div>
@@ -1137,7 +1138,7 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
 
       {/* Cart */}
       <div>
-        <div style={{ background:'#fff', borderRadius:12, padding:20,
+        <div style={{ background:'#fff', borderRadius:12, padding: isMobile ? 14 : 20,
                       boxShadow:'0 1px 8px rgba(0,0,0,0.06)', position: isMobile ? 'static' : 'sticky', top:80 }}>
           <h3 style={{ margin:'0 0 14px', fontSize:15, fontWeight:700, color:'#1a3a2a' }}>🛒 New Sale</h3>
           <div style={{ position:'relative', marginBottom:14 }}>
@@ -1306,8 +1307,8 @@ function ExpensesPage({ expenses, onAdd, onDelete, isAdmin, netProfit, totalProf
           )}
 
           <div style={{ background:'#fff', borderRadius:12, boxShadow:'0 1px 8px rgba(0,0,0,0.06)', overflow:'hidden' }}>
-            <div style={{ overflowX: isMobile ? 'auto' : 'visible', WebkitOverflowScrolling:'touch' }}>
-            <table style={{ width:'100%', borderCollapse:'collapse', fontSize: isMobile ? 11 : 13, minWidth: isMobile ? 340 : 'auto' }}>
+            <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
+            <table style={{ width:'100%', borderCollapse:'collapse', fontSize: isMobile ? 11 : 13, minWidth: isMobile ? 380 : 'auto' }}>
               <thead><tr style={{ background:'#f5f5f5' }}>
                 {['Date','Description','Amount',''].map(h=>
                   <th key={h} style={{ padding:'10px 14px', textAlign:'left', fontWeight:700, color:'#444', fontSize:12 }}>{h}</th>)}
@@ -1337,12 +1338,12 @@ function ExpensesPage({ expenses, onAdd, onDelete, isAdmin, netProfit, totalProf
           </div>
         </div>
 
-        <div style={{ background:'#fff', borderRadius:12, padding:20, boxShadow:'0 1px 8px rgba(0,0,0,0.06)' }}>
-          <h3 style={{ margin:'0 0 14px', fontSize:14, fontWeight:700, color:'#1a3a2a' }}>Monthly Breakdown</h3>
+        <div style={{ background:'#fff', borderRadius:12, padding: isMobile ? '12px 14px' : 20, boxShadow:'0 1px 8px rgba(0,0,0,0.06)' }}>
+          <h3 style={{ margin:'0 0 10px', fontSize: isMobile ? 13 : 14, fontWeight:700, color:'#1a3a2a' }}>Monthly Breakdown</h3>
           {Object.entries(monthlyExp).sort((a,b)=>b[0].localeCompare(a[0])).map(([m,amt])=>(
             <div key={m} style={{ display:'flex', justifyContent:'space-between', alignItems:'center',
-                                   padding:'10px 0', borderBottom:'1px solid #f5f5f5' }}>
-              <div style={{ fontSize:13, color:'#555' }}>
+                                   padding: isMobile ? '7px 0' : '10px 0', borderBottom:'1px solid #f5f5f5' }}>
+              <div style={{ fontSize: isMobile ? 11 : 13, color:'#555' }}>
                 {new Date(m+'-01').toLocaleDateString('en-KE',{month:'long',year:'numeric'})}
               </div>
               <div style={{ fontWeight:700, color:'#c62828' }}>{fmt(amt)}</div>
