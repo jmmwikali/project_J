@@ -325,7 +325,7 @@ function AgrovetApp() {
   };
 
   return (
-    <div style={{ display:'flex', flexDirection: isMobile ? 'column' : 'row', minHeight:'100vh', background:'#f0f4f0', fontFamily:"'Lato','Segoe UI',sans-serif" }}>
+    <div style={{ display:'flex', flexDirection: isMobile ? 'column' : 'row', minHeight: isMobile ? 'unset' : '100vh', background:'#f0f4f0', fontFamily:"'Lato','Segoe UI',sans-serif" }}>
       {/* ── Sidebar ── */}
       <aside id="mobile-nav" style={{
         background:'linear-gradient(180deg,#1a3a2a,#0d2118)', color:'#fff',
@@ -499,7 +499,7 @@ function Dashboard({ inventory, sales, expenses, lowStockItems, outOfStock,
 
   return (
     <div style={{ maxWidth:'100%', overflowX:'hidden' }}>
-      <div style={{ display:'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(auto-fit,minmax(200px,1fr))', gap: isMobile ? 10 : 16, marginBottom: isMobile ? 14 : 24 }}>
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit,minmax(200px,1fr))', gap: isMobile ? 10 : 16, marginBottom: isMobile ? 14 : 24 }}>
         <StatCard label="Total Revenue" value={fmt(totalRevenue)} icon="sales" color="#1565c0" sub="All recorded sales"/>
         <StatCard label="Gross Profit" value={fmt(totalProfit)} icon="reports" color="#2e7d32"
                   sub={`Margin: ${totalRevenue ? ((totalProfit/totalRevenue)*100).toFixed(1) : 0}%`}/>
@@ -565,7 +565,7 @@ function Dashboard({ inventory, sales, expenses, lowStockItems, outOfStock,
                     style={{ fontSize:12, color:'#4caf50', background:'none', border:'none',
                              cursor:'pointer', fontWeight:600 }}>View Inventory →</button>
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))', gap:10 }}>
+          <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit,minmax(200px,1fr))', gap: isMobile ? 10 : 16, marginBottom: isMobile ? 14 : 24 }}>
             {lowStockItems.map(item => (
               <div key={item.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between',
                                           background: item.quantity===0?'#ffebee':'#fff8e1',
@@ -1253,10 +1253,10 @@ function ExpensesPage({ expenses, onAdd, onDelete, isAdmin, netProfit, totalProf
             <div style={{ fontSize: isMobile ? 10 : 11, color:'#aaa' }}>{s}</div>
           </div>
         ))}
-        <div style={{ background:'#fff', borderRadius:12, padding:'18px 22px',
+        <div style={{ background:'#fff', borderRadius:12, padding: isMobile ? '12px 14px' : '18px 22px',
                       boxShadow:'0 1px 8px rgba(0,0,0,0.06)', borderLeft:'4px solid #1565c0' }}>
-          <div style={{ fontSize:12, color:'#888', fontWeight:600, marginBottom:6 }}>Formula</div>
-          <div style={{ fontFamily:'monospace', fontSize:12, color:'#333', lineHeight:1.8 }}>
+          <div style={{ fontSize: isMobile ? 10 : 12, color:'#888', fontWeight:600, marginBottom:6 }}>Formula</div>
+          <div style={{ fontFamily:'monospace', fontSize: isMobile ? 10 : 12, color:'#333', lineHeight:1.8 }}>
             net = gross − expenses<br/>
             {fmt(totalProfit)} − {fmt(totalExp)} = <strong style={{ color: netProfit>=0?'#2e7d32':'#c62828' }}>{fmt(netProfit)}</strong>
           </div>
