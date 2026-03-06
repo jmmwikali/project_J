@@ -6,6 +6,17 @@
 
 const { useState, useEffect, useCallback } = React;
 
+// ── Mobile detection hook ──
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return isMobile;
+}
+
 const API_BASE = 'https://project-b-35y2.onrender.com';
 
 // ── API helper ────────────────────────────────────────────────
@@ -268,6 +279,7 @@ function AgrovetApp() {
   const totalExpenses  = expenses.reduce((a,e) => a + e.amount, 0);
   const netProfit      = totalProfit - totalExpenses;
   const isAdmin        = currentUser?.role === 'admin';
+  const isMobile      = useIsMobile();
 
   // ── Show login if not authenticated ──────────────────────
   if (!authChecked) {
@@ -313,11 +325,21 @@ function AgrovetApp() {
   };
 
   return (
-    <div style={{ display:'flex', minHeight:'100vh', background:'#f0f4f0', fontFamily:"'Lato','Segoe UI',sans-serif" }}>
+    <div style={{ display:'flex', flexDirection: isMobile ? 'column' : 'row', minHeight:'100vh', background:'#f0f4f0', fontFamily:"'Lato','Segoe UI',sans-serif" }}>
       {/* ── Sidebar ── */}
-      <aside id="mobile-nav" style={{ width:220, background:'linear-gradient(180deg,#1a3a2a,#0d2118)', color:'#fff',
-                      display:'flex', flexDirection:'column', position:'fixed', height:'100vh', zIndex:100 }}>
-        <div style={{ padding:'24px 20px 16px', borderBottom:'1px solid rgba(255,255,255,0.1)' }}>
+      <aside id="mobile-nav" style={{
+        background:'linear-gradient(180deg,#1a3a2a,#0d2118)', color:'#fff',
+        display:'flex', zIndex:100, transition:'all 0.25s ease',
+        ...(isMobile ? {
+          position:'fixed', bottom:0, left:0, right:0,
+          width:'100%', height:60,
+          flexDirection:'row', alignItems:'stretch',
+        } : {
+          width:220, flexDirection:'column',
+          position:'fixed', height:'100vh',
+        })
+      }}>
+        <div style={{ padding:'24px 20px 16px', borderBottom:'1px solid rgba(255,255,255,0.1)', display: isMobile ? 'none' : 'block' }}>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
             <div style={{ width:36, height:36, borderRadius:8, background:'#4caf50',
                           display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>🌱</div>
@@ -328,15 +350,27 @@ function AgrovetApp() {
           </div>
         </div>
 
-        <nav style={{ flex:1, padding:'12px 0' }}>
+        <nav style={{ flex:1, padding: isMobile ? '0' : '12px 0', display:'flex', flexDirection: isMobile ? 'row' : 'column', alignItems: isMobile ? 'stretch' : 'flex-start', overflowX: isMobile ? 'auto' : 'visible' }}>
           {tabs.map(t => (
             <button key={t.id} onClick={() => setActiveTab(t.id)}
-                    style={{ width:'100%', display:'flex', alignItems:'center', gap:12, padding:'11px 20px',
-                             background: activeTab===t.id ? 'rgba(76,175,80,0.25)' : 'transparent',
-                             color: activeTab===t.id ? '#81c784' : 'rgba(255,255,255,0.7)',
-                             border:'none', cursor:'pointer', fontSize:13.5,
-                             fontWeight: activeTab===t.id ? 700 : 400,
-                             borderLeft: activeTab===t.id ? '3px solid #4caf50' : '3px solid transparent' }}>
+                    style={{
+                      flex: isMobile ? 1 : 'unset',
+                      width: isMobile ? 'auto' : '100%',
+                      display:'flex',
+                      alignItems:'center',
+                      justifyContent: isMobile ? 'center' : 'flex-start',
+                      flexDirection: isMobile ? 'column' : 'row',
+                      gap: isMobile ? 2 : 12,
+                      padding: isMobile ? '6px 4px' : '11px 20px',
+                      background: activeTab===t.id ? 'rgba(76,175,80,0.25)' : 'transparent',
+                      color: activeTab===t.id ? '#81c784' : 'rgba(255,255,255,0.7)',
+                      border:'none', cursor:'pointer',
+                      fontSize: isMobile ? 9 : 13.5,
+                      fontWeight: activeTab===t.id ? 700 : 400,
+                      borderLeft: isMobile ? 'none' : (activeTab===t.id ? '3px solid #4caf50' : '3px solid transparent'),
+                      borderTop: isMobile ? (activeTab===t.id ? '3px solid #4caf50' : '3px solid transparent') : 'none',
+                      minWidth: isMobile ? 50 : 'unset',
+                    }}>
               <Icon name={t.icon} size={16}/>
               {t.label}
               {t.id==='inventory' && lowStockItems.length>0 &&
@@ -348,7 +382,7 @@ function AgrovetApp() {
           ))}
         </nav>
 
-        <div style={{ padding:'16px 20px', borderTop:'1px solid rgba(255,255,255,0.1)' }}>
+        <div style={{ padding:'16px 20px', borderTop:'1px solid rgba(255,255,255,0.1)', display: isMobile ? 'none' : 'block' }}>
           <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
             <div style={{ width:32, height:32, borderRadius:'50%', background:'#4caf50',
                           display:'flex', alignItems:'center', justifyContent:'center',
@@ -369,9 +403,9 @@ function AgrovetApp() {
       </aside>
 
       {/* ── Main content ── */}
-      <main id="main-content" style={{ flex:1, marginLeft:220, minHeight:'100vh' }}>
+      <main id="main-content" style={{ flex:1, marginLeft: isMobile ? 0 : 220, marginBottom: isMobile ? 60 : 0, minHeight:'100vh', transition:'all 0.25s ease' }}>
         {/* Topbar */}
-        <div id="topbar" style={{ background:'#fff', padding:'14px 28px', display:'flex', alignItems:'center',
+        <div id="topbar" style={{ background:'#fff', padding: isMobile ? '10px 14px' : '14px 28px', display:'flex', alignItems:'center',
                       justifyContent:'space-between', borderBottom:'1px solid #e8f0e8',
                       position:'sticky', top:0, zIndex:50 }}>
           <div style={{ fontSize:18, fontWeight:700, color:'#1a3a2a' }}>
@@ -422,7 +456,7 @@ function AgrovetApp() {
           </div>
         )}
 
-        <div style={{ padding:'24px 28px' }}>{renderPage()}</div>
+        <div style={{ padding: isMobile ? '14px' : '24px 28px' }}>{renderPage()}</div>
       </main>
     </div>
   );
