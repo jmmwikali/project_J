@@ -467,6 +467,7 @@ function AgrovetApp() {
 // ============================================================
 function Dashboard({ inventory, sales, expenses, lowStockItems, outOfStock,
                      totalRevenue, totalProfit, netProfit, businessInfo, setActiveTab }) {
+  const isMobile = useIsMobile();                    
   const todaySales   = sales.filter(s => s.date === today());
   const todayRevenue = todaySales.reduce((a,s) => a + s.total_amount, 0);
   const todayProfit  = todaySales.reduce((a,s) => a + s.total_profit, 0);
@@ -497,8 +498,8 @@ function Dashboard({ inventory, sales, expenses, lowStockItems, outOfStock,
   );
 
   return (
-    <div>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:16, marginBottom:24 }}>
+    <div style={{ maxWidth:'100%', overflowX:'hidden' }}>
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(auto-fit,minmax(200px,1fr))', gap: isMobile ? 10 : 16, marginBottom: isMobile ? 14 : 24 }}>
         <StatCard label="Total Revenue" value={fmt(totalRevenue)} icon="sales" color="#1565c0" sub="All recorded sales"/>
         <StatCard label="Gross Profit" value={fmt(totalProfit)} icon="reports" color="#2e7d32"
                   sub={`Margin: ${totalRevenue ? ((totalProfit/totalRevenue)*100).toFixed(1) : 0}%`}/>
@@ -512,7 +513,7 @@ function Dashboard({ inventory, sales, expenses, lowStockItems, outOfStock,
                   sub={`${outOfStock.length} out of stock`}/>
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:20 }}>
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: isMobile ? 12 : 20 }}>
         <div style={{ background:'#fff', borderRadius:12, padding:22, boxShadow:'0 1px 8px rgba(0,0,0,0.06)' }}>
           <h3 style={{ margin:'0 0 16px', fontSize:14, fontWeight:700, color:'#1a3a2a' }}>📊 Financial Overview</h3>
           <div style={{ background:'#f9f9f9', borderRadius:10, padding:16, fontFamily:'monospace',
@@ -589,26 +590,28 @@ function Dashboard({ inventory, sales, expenses, lowStockItems, outOfStock,
         <h3 style={{ margin:'0 0 14px', fontSize:14, fontWeight:700, color:'#1a3a2a' }}>Recent Sales</h3>
         {sales.length === 0
           ? <div style={{ color:'#aaa', fontSize:13 }}>No sales recorded yet.</div>
-          : <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
-              <thead>
-                <tr style={{ background:'#f5f5f5' }}>
-                  {['Date','Items','Revenue','Profit'].map(h =>
-                    <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontWeight:600, color:'#555', fontSize:12 }}>{h}</th>)}
-                </tr>
-              </thead>
-              <tbody>
-                {[...sales].slice(0,5).map(s => (
-                  <tr key={s.id} style={{ borderBottom:'1px solid #f0f0f0' }}>
-                    <td style={{ padding:'10px 12px', color:'#666' }}>{s.date}</td>
-                    <td style={{ padding:'10px 12px', color:'#333', fontSize:12 }}>
-                      {(s.items||[]).map(i=>i.name).join(', ').substring(0,50)}
-                    </td>
-                    <td style={{ padding:'10px 12px', fontWeight:600, color:'#1565c0' }}>{fmt(s.total_amount)}</td>
-                    <td style={{ padding:'10px 12px', fontWeight:600, color:'#2e7d32' }}>{fmt(s.total_profit)}</td>
+          : <div style={{ overflowX: isMobile ? 'auto' : 'visible' }}>
+              <table style={{ width:'100%', borderCollapse:'collapse', fontSize: isMobile ? 11 : 13, minWidth: isMobile ? 0 : 'auto' }}>
+                <thead>
+                  <tr style={{ background:'#f5f5f5' }}>
+                    {(isMobile ? ['Date','Items','Rev','Profit'] : ['Date','Items','Revenue','Profit']).map(h =>
+                      <th key={h} style={{ padding: isMobile ? '6px 6px' : '8px 12px', textAlign:'left', fontWeight:600, color:'#555', fontSize: isMobile ? 10 : 12 }}>{h}</th>)}
                   </tr>
-                ))}
-              </tbody>
-            </table>}
+                </thead>
+                <tbody>
+                  {[...sales].slice(0,5).map(s => (
+                    <tr key={s.id} style={{ borderBottom:'1px solid #f0f0f0' }}>
+                      <td style={{ padding: isMobile ? '7px 6px' : '10px 12px', color:'#666', fontSize: isMobile ? 10 : 13, whiteSpace:'nowrap' }}>{isMobile ? s.date.substring(5) : s.date}</td>
+                      <td style={{ padding: isMobile ? '7px 6px' : '10px 12px', color:'#333', fontSize: isMobile ? 10 : 12, maxWidth: isMobile ? 90 : 'none', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                        {(s.items||[]).map(i=>i.name).join(', ').substring(0, isMobile ? 20 : 50)}
+                      </td>
+                      <td style={{ padding: isMobile ? '7px 6px' : '10px 12px', fontWeight:600, color:'#1565c0', fontSize: isMobile ? 10 : 13, whiteSpace:'nowrap' }}>{isMobile ? fmt(s.total_amount).replace('KSh','') : fmt(s.total_amount)}</td>
+                      <td style={{ padding: isMobile ? '7px 6px' : '10px 12px', fontWeight:600, color:'#2e7d32', fontSize: isMobile ? 10 : 13, whiteSpace:'nowrap' }}>{isMobile ? fmt(s.total_profit).replace('KSh','') : fmt(s.total_profit)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>}
       </div>
     </div>
   );
@@ -968,6 +971,7 @@ function InventoryPage({ inventory, categories, isAdmin, onUpdate, onAdd, onDele
 // SALES PAGE
 // ============================================================
 function SalesPage({ inventory, sales, onAddSale, currentUser }) {
+  const isMobile = useIsMobile();
   const [cartItems,   setCartItems]   = useState([]);
   const [searchItem,  setSearchItem]  = useState('');
   const [viewReceipt, setViewReceipt] = useState(null);
@@ -1066,7 +1070,7 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
   );
 
   return (
-    <div style={{ display:'grid', gridTemplateColumns:'1fr 340px', gap:20 }}>
+    <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 340px', gap: isMobile ? 12 : 20 }}>
       <div>
         <div style={{ background:'#fff', borderRadius:12, padding:20,
                       boxShadow:'0 1px 8px rgba(0,0,0,0.06)' }}>
@@ -1093,38 +1097,40 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
               </div>
             ) : null;
           })()}
-          <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
-            <thead><tr style={{ background:'#f5f5f5' }}>
-              {['Date','Items','Amount','Profit',''].map(h=>
-                <th key={h} style={{ padding:'9px 12px', textAlign:'left', fontWeight:700, color:'#444', fontSize:12 }}>{h}</th>)}
-            </tr></thead>
-            <tbody>
-              {filteredSales.map(s=>(
-                <tr key={s.id} style={{ borderBottom:'1px solid #f5f5f5' }}>
-                  <td style={{ padding:'10px 12px', color:'#666' }}>{s.date}</td>
-                  <td style={{ padding:'10px 12px', fontSize:11 }}>
-                    {(s.items||[]).map(i=>(
-                      <span key={i.item_id||i.id} style={{ display:'inline-block', background:'#f0f0f0',
-                            borderRadius:4, padding:'1px 6px', marginRight:4, marginBottom:2, fontSize:11 }}>
-                        {i.name} ×{i.quantity}
-                      </span>
-                    ))}
-                  </td>
-                  <td style={{ padding:'10px 12px', fontWeight:700, color:'#1565c0' }}>{fmt(s.total_amount)}</td>
-                  <td style={{ padding:'10px 12px', fontWeight:700, color:'#2e7d32' }}>{fmt(s.total_profit)}</td>
-                  <td style={{ padding:'10px 12px' }}>
-                    <button onClick={async () => {
-                      const data = await api(`/api/sales/${s.id}/receipt`);
-                      setViewReceipt(data.receipt);
-                    }} style={{ padding:'4px 10px', background:'#e8f5e9', color:'#2e7d32',
-                               border:'none', borderRadius:6, cursor:'pointer', fontSize:11, fontWeight:600 }}>
-                      Receipt
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
+            <table style={{ width:'100%', borderCollapse:'collapse', fontSize: isMobile ? 11 : 13, minWidth: isMobile ? 420 : 'auto' }}>
+              <thead><tr style={{ background:'#f5f5f5' }}>
+                {['Date','Items','Amount','Profit',''].map(h=>
+                  <th key={h} style={{ padding: isMobile ? '7px 8px' : '9px 12px', textAlign:'left', fontWeight:700, color:'#444', fontSize: isMobile ? 10 : 12 }}>{h}</th>)}
+              </tr></thead>
+              <tbody>
+                {filteredSales.map(s=>(
+                  <tr key={s.id} style={{ borderBottom:'1px solid #f5f5f5' }}>
+                    <td style={{ padding:'10px 12px', color:'#666' }}>{s.date}</td>
+                    <td style={{ padding:'10px 12px', fontSize:11 }}>
+                      {(s.items||[]).map(i=>(
+                        <span key={i.item_id||i.id} style={{ display:'inline-block', background:'#f0f0f0',
+                              borderRadius:4, padding:'1px 6px', marginRight:4, marginBottom:2, fontSize:11 }}>
+                          {i.name} ×{i.quantity}
+                        </span>
+                      ))}
+                    </td>
+                    <td style={{ padding:'10px 12px', fontWeight:700, color:'#1565c0' }}>{fmt(s.total_amount)}</td>
+                    <td style={{ padding:'10px 12px', fontWeight:700, color:'#2e7d32' }}>{fmt(s.total_profit)}</td>
+                    <td style={{ padding:'10px 12px' }}>
+                      <button onClick={async () => {
+                        const data = await api(`/api/sales/${s.id}/receipt`);
+                        setViewReceipt(data.receipt);
+                      }} style={{ padding:'4px 10px', background:'#e8f5e9', color:'#2e7d32',
+                                border:'none', borderRadius:6, cursor:'pointer', fontSize:11, fontWeight:600 }}>
+                        Receipt
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {filteredSales.length===0 && <div style={{ padding:24, textAlign:'center', color:'#aaa', fontSize:13 }}>No sales found.</div>}
         </div>
       </div>
@@ -1132,7 +1138,7 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
       {/* Cart */}
       <div>
         <div style={{ background:'#fff', borderRadius:12, padding:20,
-                      boxShadow:'0 1px 8px rgba(0,0,0,0.06)', position:'sticky', top:80 }}>
+                      boxShadow:'0 1px 8px rgba(0,0,0,0.06)', position: isMobile ? 'static' : 'sticky', top:80 }}>
           <h3 style={{ margin:'0 0 14px', fontSize:15, fontWeight:700, color:'#1a3a2a' }}>🛒 New Sale</h3>
           <div style={{ position:'relative', marginBottom:14 }}>
             <input value={searchItem} onChange={e=>setSearchItem(e.target.value)}
@@ -1220,6 +1226,7 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
 // EXPENSES PAGE
 // ============================================================
 function ExpensesPage({ expenses, onAdd, onDelete, isAdmin, netProfit, totalProfit }) {
+  const isMobile = useIsMobile();
   const [form,     setForm]     = useState({ date:today(), description:'', amount:'' });
   const [showForm, setShowForm] = useState(false);
   const [saving,   setSaving]   = useState(false);
@@ -1233,16 +1240,16 @@ function ExpensesPage({ expenses, onAdd, onDelete, isAdmin, netProfit, totalProf
 
   return (
     <div>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:16, marginBottom:22 }}>
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(auto-fit,minmax(200px,1fr))', gap: isMobile ? 8 : 16, marginBottom: isMobile ? 12 : 22 }}>
         {[['Total Expenses', fmt(totalExp),    '#c62828', 'Recorded expenses'],
           ['Gross Profit',   fmt(totalProfit), '#2e7d32', 'Before expenses'],
           ['Net Profit',     fmt(netProfit),   netProfit>=0?'#558b2f':'#c62828', 'After expenses'],
         ].map(([l,v,c,s])=>(
-          <div key={l} style={{ background:'#fff', borderRadius:12, padding:'18px 22px',
+          <div key={l} style={{ background:'#fff', borderRadius:12, padding: isMobile ? '12px 14px' : '18px 22px',
                                 boxShadow:'0 1px 8px rgba(0,0,0,0.06)', borderLeft:`4px solid ${c}` }}>
-            <div style={{ fontSize:12, color:'#888', fontWeight:600 }}>{l}</div>
-            <div style={{ fontSize:22, fontWeight:800, color:c, margin:'4px 0 2px' }}>{v}</div>
-            <div style={{ fontSize:11, color:'#aaa' }}>{s}</div>
+            <div style={{ fontSize: isMobile ? 10 : 12, color:'#888', fontWeight:600 }}>{l}</div>
+            <div style={{ fontSize: isMobile ? 16 : 22, fontWeight:800, color:c, margin:'4px 0 2px' }}>{v}</div>
+            <div style={{ fontSize: isMobile ? 10 : 11, color:'#aaa' }}>{s}</div>
           </div>
         ))}
         <div style={{ background:'#fff', borderRadius:12, padding:'18px 22px',
@@ -1255,7 +1262,7 @@ function ExpensesPage({ expenses, onAdd, onDelete, isAdmin, netProfit, totalProf
         </div>
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:20 }}>
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: isMobile ? 12 : 20 }}>
         <div>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
             <h3 style={{ margin:0, fontSize:15, fontWeight:700, color:'#1a3a2a' }}>Expense Records</h3>
@@ -1270,7 +1277,7 @@ function ExpensesPage({ expenses, onAdd, onDelete, isAdmin, netProfit, totalProf
           {showForm && isAdmin && (
             <div style={{ background:'#fff', borderRadius:12, padding:20, marginBottom:16,
                           boxShadow:'0 1px 8px rgba(0,0,0,0.06)', border:'1px solid #ffccbc' }}>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 2fr 1fr', gap:12 }}>
+              <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 2fr 1fr', gap:12 }}>
                 {[['Date','date','date'],['Description','description','text'],['Amount (KES)','amount','number']].map(([l,f,t])=>(
                   <div key={f}>
                     <label style={{ fontSize:12, fontWeight:600, color:'#444', display:'block', marginBottom:4 }}>{l}</label>
@@ -1299,7 +1306,8 @@ function ExpensesPage({ expenses, onAdd, onDelete, isAdmin, netProfit, totalProf
           )}
 
           <div style={{ background:'#fff', borderRadius:12, boxShadow:'0 1px 8px rgba(0,0,0,0.06)', overflow:'hidden' }}>
-            <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
+            <div style={{ overflowX: isMobile ? 'auto' : 'visible', WebkitOverflowScrolling:'touch' }}>
+            <table style={{ width:'100%', borderCollapse:'collapse', fontSize: isMobile ? 11 : 13, minWidth: isMobile ? 340 : 'auto' }}>
               <thead><tr style={{ background:'#f5f5f5' }}>
                 {['Date','Description','Amount',''].map(h=>
                   <th key={h} style={{ padding:'10px 14px', textAlign:'left', fontWeight:700, color:'#444', fontSize:12 }}>{h}</th>)}
@@ -1325,6 +1333,7 @@ function ExpensesPage({ expenses, onAdd, onDelete, isAdmin, netProfit, totalProf
                 <td/>
               </tr></tfoot>
             </table>
+            </div>
           </div>
         </div>
 
@@ -1505,6 +1514,7 @@ function ReportsPage({ businessInfo }) {
 // USERS PAGE
 // ============================================================
 function UsersPage({ users, setUsers, showNotif }) {
+  const isMobile = useIsMobile();
   const [showAdd, setShowAdd] = useState(false);
   const [newUser, setNewUser] = useState({ name:'', username:'', role:'attendant', password:'' });
   const [saving,  setSaving]  = useState(false);
@@ -1566,7 +1576,8 @@ function UsersPage({ users, setUsers, showNotif }) {
       )}
 
       <div style={{ background:'#fff', borderRadius:12, boxShadow:'0 1px 8px rgba(0,0,0,0.06)', overflow:'hidden' }}>
-        <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
+        <div style={{ overflowX: isMobile ? 'auto' : 'visible', WebkitOverflowScrolling:'touch' }}>
+        <table style={{ width:'100%', borderCollapse:'collapse', fontSize: isMobile ? 11 : 14, minWidth: isMobile ? 400 : 'auto' }}>
           <thead><tr style={{ background:'#f5f5f5' }}>
             {['#','Name','Username','Role','Access'].map(h=>
               <th key={h} style={{ padding:'11px 16px', textAlign:'left', fontWeight:700, color:'#444', fontSize:12 }}>{h}</th>)}
@@ -1591,6 +1602,7 @@ function UsersPage({ users, setUsers, showNotif }) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
