@@ -248,6 +248,12 @@ function AgrovetApp() {
   };
 
   // ── Sales actions ─────────────────────────────────────────
+  const deleteSalesByDate = async (date) => {
+    const data = await api(`/api/sales/by-date/${date}`, { method: 'DELETE' });
+    setSales(prev => prev.filter(s => s.date !== date));
+    showNotif(data.message, 'success');
+  };
+
   const addSale = async (saleData) => {
     const data = await api('/api/sales', { method:'POST', body: saleData });
     setSales(prev => [data.sale, ...prev]);
@@ -315,7 +321,7 @@ function AgrovetApp() {
         onUpdate={updateInventoryItem} onAdd={addInventoryItem} onDelete={deleteInventoryItem}
         onRestock={restock} onAdjust={adjustStock} showNotif={showNotif} setModal={setModal}/>;
       case 'sales':    return <SalesPage inventory={inventory} sales={sales} onAddSale={addSale}
-        currentUser={currentUser} setModal={setModal}/>;
+        onDeleteByDate={deleteSalesByDate} currentUser={currentUser} setModal={setModal} showNotif={showNotif}/>;
       case 'expenses': return <ExpensesPage expenses={expenses} onAdd={addExpense} onDelete={deleteExpense}
         isAdmin={isAdmin} netProfit={netProfit} totalProfit={totalProfit}/>;
       case 'reports':  return <ReportsPage businessInfo={businessInfo}/>;
@@ -456,7 +462,7 @@ function AgrovetApp() {
           </div>
         )}
 
-        <div style={{ padding: isMobile ? '10px' : '24px 28px', overflowX:'hidden', width:'100%', boxSizing:'border-box' }}>{renderPage()}</div>
+        <div style={{ padding: isMobile ? '14px' : '24px 28px' }}>{renderPage()}</div>
       </main>
     </div>
   );
@@ -971,7 +977,7 @@ function InventoryPage({ inventory, categories, isAdmin, onUpdate, onAdd, onDele
 // ============================================================
 // SALES PAGE
 // ============================================================
-function SalesPage({ inventory, sales, onAddSale, currentUser }) {
+function SalesPage({ inventory, sales, onAddSale, onDeleteByDate, currentUser, setModal, showNotif }) {
   const isMobile = useIsMobile();
   const [cartItems,   setCartItems]   = useState([]);
   const [searchItem,  setSearchItem]  = useState('');
@@ -1071,16 +1077,45 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
   );
 
   return (
-    <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 340px', gap: isMobile ? 12 : 20, alignItems:'start', width:'100%', boxSizing:'border-box' }}>
+    <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 340px', gap: isMobile ? 12 : 20, alignItems:'start' }}>
       <div>
-        <div style={{ background:'#fff', borderRadius:12, padding: isMobile ? '14px 12px' : 20,
+        <div style={{ background:'#fff', borderRadius:12, padding:20,
                       boxShadow:'0 1px 8px rgba(0,0,0,0.06)',
-                      maxHeight: isMobile ? 500 : 'none', overflowY: isMobile ? 'auto' : 'visible',
-                      width:'100%', boxSizing:'border-box', overflowX:'hidden' }}>
+                      maxHeight: isMobile ? 500 : 'none', overflowY: isMobile ? 'auto' : 'visible' }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
             <h3 style={{ margin:0, fontSize:15, fontWeight:700, color:'#1a3a2a' }}>Sales History</h3>
-            <input type="date" value={dateFilter} onChange={e=>setDateFilter(e.target.value)}
-                   style={{ padding:'6px 12px', borderRadius:8, border:'1px solid #ddd', fontSize:12 }}/>
+            <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+              <input type="date" value={dateFilter} onChange={e=>setDateFilter(e.target.value)}
+                     style={{ padding:'6px 12px', borderRadius:8, border:'1px solid #ddd', fontSize:12 }}/>
+              {dateFilter && currentUser?.role==='admin' && (
+                <button onClick={() => setModal(
+                  <div>
+                    <h3 style={{ margin:'0 0 12px', color:'#1a3a2a' }}>Delete Sales for {dateFilter}?</h3>
+                    <p style={{ color:'#666', fontSize:13, margin:'0 0 18px' }}>
+                      This will permanently delete all sales recorded on <strong>{dateFilter}</strong>. This cannot be undone.
+                    </p>
+                    <div style={{ display:'flex', gap:10 }}>
+                      <button onClick={()=>setModal(null)}
+                              style={{ flex:1, padding:'9px', border:'1.5px solid #ddd', borderRadius:8,
+                                       background:'#fff', cursor:'pointer', fontSize:13, fontWeight:600 }}>
+                        Cancel
+                      </button>
+                      <button onClick={async()=>{
+                        try { await onDeleteByDate(dateFilter); setModal(null); setDateFilter(''); }
+                        catch(e){ showNotif(e.message,'error'); setModal(null); }
+                      }} style={{ flex:1, padding:'9px', background:'#c62828', color:'#fff',
+                                  border:'none', borderRadius:8, cursor:'pointer', fontSize:13, fontWeight:700 }}>
+                        🗑 Delete All
+                      </button>
+                    </div>
+                  </div>
+                )} style={{ padding:'6px 12px', background:'#ffebee', color:'#c62828',
+                            border:'1px solid #ffcdd2', borderRadius:8, cursor:'pointer',
+                            fontSize:12, fontWeight:600, whiteSpace:'nowrap' }}>
+                  🗑 Delete Day
+                </button>
+              )}
+            </div>
           </div>
           {(() => {
             const ts = sales.filter(s=>s.date===today());
@@ -1116,7 +1151,7 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
             ) : null;
           })()}
           <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
-            <table style={{ width:'100%', borderCollapse:'collapse', fontSize: isMobile ? 11 : 13, minWidth: isMobile ? 340 : 'auto' }}>
+            <table style={{ width:'100%', borderCollapse:'collapse', fontSize: isMobile ? 11 : 13, minWidth: isMobile ? 420 : 'auto' }}>
               <thead><tr style={{ background:'#f5f5f5' }}>
                 {['Date','Items','Amount','Profit',''].map(h=>
                   <th key={h} style={{ padding: isMobile ? '7px 8px' : '9px 12px', textAlign:'left', fontWeight:700, color:'#444', fontSize: isMobile ? 10 : 12 }}>{h}</th>)}
@@ -1155,9 +1190,9 @@ function SalesPage({ inventory, sales, onAddSale, currentUser }) {
 
       {/* Cart */}
       <div>
-        <div style={{ background:'#fff', borderRadius:12, padding: isMobile ? '14px 12px' : 20,
+        <div style={{ background:'#fff', borderRadius:12, padding: isMobile ? 14 : 20,
                       boxShadow:'0 1px 8px rgba(0,0,0,0.06)', position: isMobile ? 'static' : 'sticky',
-                      top:80, width:'100%', boxSizing:'border-box', overflowX:'hidden', minWidth:0 }}>
+                      top:80, width:'100%', boxSizing:'border-box', overflowX:'hidden' }}>
           <h3 style={{ margin:'0 0 14px', fontSize:15, fontWeight:700, color:'#1a3a2a' }}>🛒 New Sale</h3>
           <div style={{ position:'relative', marginBottom:14 }}>
             <input value={searchItem} onChange={e=>setSearchItem(e.target.value)}
