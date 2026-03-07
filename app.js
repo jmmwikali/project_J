@@ -325,7 +325,7 @@ function AgrovetApp() {
       case 'expenses': return <ExpensesPage expenses={expenses} onAdd={addExpense} onDelete={deleteExpense}
         isAdmin={isAdmin} netProfit={netProfit} totalProfit={totalProfit}/>;
       case 'reports':  return <ReportsPage businessInfo={businessInfo}/>;
-      case 'users':    return <UsersPage users={users} setUsers={setUsers} showNotif={showNotif}/>;
+      case 'users':    return <UsersPage users={users} setUsers={setUsers} showNotif={showNotif} currentUser={currentUser} setModal={setModal}/>;
       default: return null;
     }
   };
@@ -1634,13 +1634,88 @@ function ReportsPage({ businessInfo }) {
 }
 
 // ============================================================
+// ============================================================
+// EDIT USER MODAL
+// ============================================================
+function EditUserModal({ user, onSave, onClose }) {
+  const [username, setUsername] = useState(user.username);
+  const [name,     setName]     = useState(user.name || '');
+  const [password, setPassword] = useState('');
+  const [role,     setRole]     = useState(user.role);
+  const [saving,   setSaving]   = useState(false);
+
+  return (
+    <div>
+      <h3 style={{ margin:'0 0 16px', color:'#1a3a2a' }}>Edit User: {user.username}</h3>
+      <div style={{ marginBottom:12 }}>
+        <label style={{ fontSize:12, fontWeight:600, color:'#444', display:'block', marginBottom:4 }}>Full Name</label>
+        <input type="text" value={name} onChange={e=>setName(e.target.value)}
+               style={{ width:'100%', padding:'9px 12px', borderRadius:8,
+                        border:'1.5px solid #ddd', fontSize:13, boxSizing:'border-box' }}/>
+      </div>
+      <div style={{ marginBottom:12 }}>
+        <label style={{ fontSize:12, fontWeight:600, color:'#444', display:'block', marginBottom:4 }}>Username</label>
+        <input type="text" value={username} onChange={e=>setUsername(e.target.value)}
+               style={{ width:'100%', padding:'9px 12px', borderRadius:8,
+                        border:'1.5px solid #ddd', fontSize:13, boxSizing:'border-box' }}/>
+      </div>
+      <div style={{ marginBottom:12 }}>
+        <label style={{ fontSize:12, fontWeight:600, color:'#444', display:'block', marginBottom:4 }}>New Password</label>
+        <input type="password" value={password} onChange={e=>setPassword(e.target.value)}
+               placeholder="Leave blank to keep current"
+               style={{ width:'100%', padding:'9px 12px', borderRadius:8,
+                        border:'1.5px solid #ddd', fontSize:13, boxSizing:'border-box' }}/>
+      </div>
+      <div style={{ marginBottom:18 }}>
+        <label style={{ fontSize:12, fontWeight:600, color:'#444', display:'block', marginBottom:4 }}>Role</label>
+        <select value={role} onChange={e=>setRole(e.target.value)}
+                style={{ width:'100%', padding:'9px 12px', borderRadius:8,
+                         border:'1.5px solid #ddd', fontSize:13, boxSizing:'border-box' }}>
+          <option value="admin">Admin</option>
+          <option value="attendant">Attendant</option>
+        </select>
+      </div>
+      <div style={{ display:'flex', gap:10 }}>
+        <button onClick={onClose}
+                style={{ flex:1, padding:'10px', border:'1.5px solid #ddd', borderRadius:8,
+                         background:'#fff', cursor:'pointer', fontSize:13, fontWeight:600 }}>
+          Cancel
+        </button>
+        <button disabled={saving} onClick={async () => {
+          if (!username.trim()) return alert('Username cannot be empty');
+          setSaving(true);
+          try { await onSave({ name, username, role, ...(password ? { password } : {}) }); }
+          catch(e) { alert(e.message); }
+          finally { setSaving(false); }
+        }} style={{ flex:1, padding:'10px', background:'#1a3a2a', color:'#fff',
+                    border:'none', borderRadius:8, cursor: saving ? 'not-allowed' : 'pointer',
+                    fontSize:13, fontWeight:700 }}>
+          {saving ? 'Saving…' : 'Save Changes'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // USERS PAGE
 // ============================================================
-function UsersPage({ users, setUsers, showNotif }) {
+function UsersPage({ users, setUsers, showNotif, currentUser, setModal }) {
   const isMobile = useIsMobile();
   const [showAdd, setShowAdd] = useState(false);
   const [newUser, setNewUser] = useState({ name:'', username:'', role:'attendant', password:'' });
   const [saving,  setSaving]  = useState(false);
+
+  const handleEditUser = async (id, data) => {
+    const result = await api(`/api/users/${id}`, { method:'PUT', body: data });
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, ...result.user } : u));
+    showNotif('User updated successfully');
+  };
+
+  const handleDeleteUser = async (id, username) => {
+    await api(`/api/users/${id}`, { method:'DELETE' });
+    setUsers(prev => prev.filter(u => u.id !== id));
+    showNotif(`User "${username}" deleted`);
+  };
 
   const addUser = async () => {
     if (!newUser.name||!newUser.username||!newUser.password) return;
@@ -1702,7 +1777,7 @@ function UsersPage({ users, setUsers, showNotif }) {
         <div style={{ overflowX: isMobile ? 'auto' : 'visible', WebkitOverflowScrolling:'touch' }}>
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize: isMobile ? 11 : 14, minWidth: isMobile ? 400 : 'auto' }}>
           <thead><tr style={{ background:'#f5f5f5' }}>
-            {['#','Name','Username','Role','Access'].map(h=>
+            {['#','Name','Username','Role','Access','Actions'].map(h=>
               <th key={h} style={{ padding:'11px 16px', textAlign:'left', fontWeight:700, color:'#444', fontSize:12 }}>{h}</th>)}
           </tr></thead>
           <tbody>
@@ -1720,6 +1795,44 @@ function UsersPage({ users, setUsers, showNotif }) {
                 </td>
                 <td style={{ padding:'13px 16px', fontSize:12, color:'#666' }}>
                   {u.role==='admin' ? 'Full access' : 'Sales entry only'}
+                </td>
+                <td style={{ padding:'13px 16px' }}>
+                  <div style={{ display:'flex', gap:6 }}>
+                    <button onClick={() => setModal(
+                      <EditUserModal user={u} onClose={()=>setModal(null)}
+                        onSave={async (data) => { await handleEditUser(u.id, data); setModal(null); }}/>
+                    )} style={{ padding:'5px 12px', background:'#e3f2fd', color:'#1565c0',
+                                border:'none', borderRadius:7, cursor:'pointer', fontSize:12, fontWeight:600 }}>
+                      ✏ Edit
+                    </button>
+                    {currentUser && u.id !== currentUser.id && (
+                      <button onClick={() => setModal(
+                        <div>
+                          <h3 style={{ margin:'0 0 12px', color:'#1a3a2a' }}>Delete User?</h3>
+                          <p style={{ color:'#666', fontSize:13, margin:'0 0 18px' }}>
+                            Permanently delete <strong>{u.name} (@{u.username})</strong>? This cannot be undone.
+                          </p>
+                          <div style={{ display:'flex', gap:10 }}>
+                            <button onClick={()=>setModal(null)}
+                                    style={{ flex:1, padding:'9px', border:'1.5px solid #ddd', borderRadius:8,
+                                             background:'#fff', cursor:'pointer', fontSize:13, fontWeight:600 }}>
+                              Cancel
+                            </button>
+                            <button onClick={async()=>{
+                              try { await handleDeleteUser(u.id, u.username); setModal(null); }
+                              catch(e){ showNotif(e.message,'error'); setModal(null); }
+                            }} style={{ flex:1, padding:'9px', background:'#c62828', color:'#fff',
+                                        border:'none', borderRadius:8, cursor:'pointer', fontSize:13, fontWeight:700 }}>
+                              🗑 Delete
+                            </button>
+                          </div>
+                        </div>
+                      )} style={{ padding:'5px 12px', background:'#ffebee', color:'#c62828',
+                                  border:'none', borderRadius:7, cursor:'pointer', fontSize:12, fontWeight:600 }}>
+                        🗑 Delete
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
