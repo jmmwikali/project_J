@@ -519,6 +519,17 @@ function Dashboard({ inventory, sales, expenses, lowStockItems, outOfStock,
                   sub={`${outOfStock.length} out of stock`}/>
       </div>
 
+      {isMobile && (
+        <div style={{ background:'#fff', borderRadius:12, padding:'14px 16px', marginBottom:12,
+                      boxShadow:'0 1px 8px rgba(0,0,0,0.06)', borderLeft:'4px solid #1565c0' }}>
+          <div style={{ fontSize:13, fontWeight:700, color:'#1a3a2a', marginBottom:6 }}>Formula</div>
+          <div style={{ fontFamily:'monospace', fontSize:12, color:'#333', lineHeight:1.9 }}>
+            net = gross − expenses<br/>
+            {fmt(totalProfit)} − {fmt(totalExp)} =<br/>
+            <strong style={{ color: netProfit>=0?'#2e7d32':'#c62828', fontSize:14 }}>{fmt(netProfit)}</strong>
+          </div>
+        </div>
+      )}
       <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: isMobile ? 12 : 20 }}>
         <div style={{ background:'#fff', borderRadius:12, padding:22, boxShadow:'0 1px 8px rgba(0,0,0,0.06)' }}>
           <h3 style={{ margin:'0 0 16px', fontSize:14, fontWeight:700, color:'#1a3a2a' }}>📊 Financial Overview</h3>
@@ -1122,69 +1133,82 @@ function SalesPage({ inventory, sales, onAddSale, onDeleteByDate, currentUser, s
             const tr = ts.reduce((a,s)=>a+s.total_amount,0);
             const tp = ts.reduce((a,s)=>a+s.total_profit,0);
             return ts.length>0 ? (
-              isMobile ? (
-                <div style={{ display:'grid', gridTemplateColumns:'1fr', gap:8, marginBottom:14 }}>
-                  {[["Today's Revenue",fmt(tr),'#e3f2fd','#1565c0'],
-                    ["Today's Profit", fmt(tp),'#e8f5e9','#2e7d32'],
-                    ["Today's Sales",  ts.length,'#f3e5f5','#6a1b9a']
-                  ].map(([l,v,bg,c])=>(
-                    <div key={l} style={{ background:bg, borderRadius:8, padding:'10px 14px',
-                                         display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                      <div style={{ fontSize:12, color:'#666' }}>{l}</div>
-                      <div style={{ fontWeight:800, color:c, fontSize:15 }}>{v}</div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ display:'flex', gap:10, marginBottom:14 }}>
-                  {[["Today's Revenue",fmt(tr),'#e3f2fd','#1565c0'],
-                    ["Today's Profit", fmt(tp),'#e8f5e9','#2e7d32'],
-                    ["Today's Sales",  ts.length,'#f3e5f5','#6a1b9a']
-                  ].map(([l,v,bg,c])=>(
-                    <div key={l} style={{ flex:1, background:bg, borderRadius:8, padding:'10px 14px' }}>
-                      <div style={{ fontSize:10, color:'#666' }}>{l}</div>
-                      <div style={{ fontWeight:800, color:c, fontSize:16 }}>{v}</div>
-                    </div>
-                  ))}
-                </div>
-              )
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:14 }}>
+                {[["Today's Revenue",fmt(tr),'#e3f2fd','#1565c0'],
+                  ["Today's Profit", fmt(tp),'#e8f5e9','#2e7d32'],
+                  ["Today's Sales",  ts.length,'#f3e5f5','#6a1b9a']
+                ].map(([l,v,bg,cc])=>(
+                  <div key={l} style={{ background:bg, borderRadius:10, padding:'10px 8px' }}>
+                    <div style={{ fontSize:10, color:'#666', lineHeight:1.3, marginBottom:4 }}>{l}</div>
+                    <div style={{ fontWeight:800, color:cc, fontSize: isMobile ? 14 : 16 }}>{v}</div>
+                  </div>
+                ))}
+              </div>
             ) : null;
           })()}
-          <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
-            <table style={{ width:'100%', borderCollapse:'collapse', fontSize: isMobile ? 11 : 13, minWidth: isMobile ? 420 : 'auto' }}>
-              <thead><tr style={{ background:'#f5f5f5' }}>
-                {['Date','Items','Amount','Profit',''].map(h=>
-                  <th key={h} style={{ padding: isMobile ? '7px 8px' : '9px 12px', textAlign:'left', fontWeight:700, color:'#444', fontSize: isMobile ? 10 : 12 }}>{h}</th>)}
-              </tr></thead>
-              <tbody>
-                {filteredSales.map(s=>(
-                  <tr key={s.id} style={{ borderBottom:'1px solid #f5f5f5' }}>
-                    <td style={{ padding:'10px 12px', color:'#666' }}>{s.date}</td>
-                    <td style={{ padding:'10px 12px', fontSize:11 }}>
-                      {(s.items||[]).map(i=>(
-                        <span key={i.item_id||i.id} style={{ display:'inline-block', background:'#f0f0f0',
-                              borderRadius:4, padding:'1px 6px', marginRight:4, marginBottom:2, fontSize:11 }}>
-                          {i.name} ×{i.quantity}
-                        </span>
-                      ))}
-                    </td>
-                    <td style={{ padding:'10px 12px', fontWeight:700, color:'#1565c0' }}>{fmt(s.total_amount)}</td>
-                    <td style={{ padding:'10px 12px', fontWeight:700, color:'#2e7d32' }}>{fmt(s.total_profit)}</td>
-                    <td style={{ padding:'10px 12px' }}>
-                      <button onClick={async () => {
-                        const data = await api(`/api/sales/${s.id}/receipt`);
-                        setViewReceipt(data.receipt);
-                      }} style={{ padding:'4px 10px', background:'#e8f5e9', color:'#2e7d32',
-                                border:'none', borderRadius:6, cursor:'pointer', fontSize:11, fontWeight:600 }}>
+          {isMobile ? (
+            <div>
+              <div style={{ background:'#f5f5f5', padding:'7px 4px', marginBottom:2, borderRadius:6 }}>
+                <span style={{ fontSize:11, fontWeight:700, color:'#444' }}>Date</span>
+              </div>
+              {filteredSales.length===0
+                ? <div style={{ padding:'20px 0', textAlign:'center', color:'#aaa', fontSize:13 }}>No sales found.</div>
+                : filteredSales.map(s=>(
+                  <div key={s.id} style={{ padding:'10px 4px', borderBottom:'1px solid #f0f0f0' }}>
+                    <div style={{ fontSize:11, color:'#888', marginBottom:3 }}>{s.date}</div>
+                    <div style={{ fontSize:12, color:'#333', marginBottom:6 }}>
+                      {(s.items||[]).map(i=>`${i.name} ×${i.quantity}`).join(', ')}
+                    </div>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                      <div>
+                        <span style={{ fontWeight:700, color:'#1565c0', fontSize:13, marginRight:10 }}>{fmt(s.total_amount)}</span>
+                        <span style={{ fontWeight:700, color:'#2e7d32', fontSize:13 }}>{fmt(s.total_profit)}</span>
+                      </div>
+                      <button onClick={async()=>{ const d=await api(`/api/sales/${s.id}/receipt`); setViewReceipt(d.receipt); }}
+                              style={{ padding:'3px 10px', background:'#e8f5e9', color:'#2e7d32',
+                                       border:'none', borderRadius:6, cursor:'pointer', fontSize:11, fontWeight:600 }}>
                         Receipt
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {filteredSales.length===0 && <div style={{ padding:24, textAlign:'center', color:'#aaa', fontSize:13 }}>No sales found.</div>}
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          ) : (
+            <div style={{ overflowX:'auto' }}>
+              <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
+                <thead><tr style={{ background:'#f5f5f5' }}>
+                  {['Date','Items','Amount','Profit',''].map(h=>
+                    <th key={h} style={{ padding:'9px 12px', textAlign:'left', fontWeight:700, color:'#444', fontSize:12 }}>{h}</th>)}
+                </tr></thead>
+                <tbody>
+                  {filteredSales.map(s=>(
+                    <tr key={s.id} style={{ borderBottom:'1px solid #f5f5f5' }}>
+                      <td style={{ padding:'10px 12px', color:'#666' }}>{s.date}</td>
+                      <td style={{ padding:'10px 12px', fontSize:11 }}>
+                        {(s.items||[]).map(i=>(
+                          <span key={i.item_id||i.id} style={{ display:'inline-block', background:'#f0f0f0',
+                                borderRadius:4, padding:'1px 6px', marginRight:4, marginBottom:2, fontSize:11 }}>
+                            {i.name} ×{i.quantity}
+                          </span>
+                        ))}
+                      </td>
+                      <td style={{ padding:'10px 12px', fontWeight:700, color:'#1565c0' }}>{fmt(s.total_amount)}</td>
+                      <td style={{ padding:'10px 12px', fontWeight:700, color:'#2e7d32' }}>{fmt(s.total_profit)}</td>
+                      <td style={{ padding:'10px 12px' }}>
+                        <button onClick={async()=>{ const d=await api(`/api/sales/${s.id}/receipt`); setViewReceipt(d.receipt); }}
+                                style={{ padding:'4px 10px', background:'#e8f5e9', color:'#2e7d32',
+                                         border:'none', borderRadius:6, cursor:'pointer', fontSize:11, fontWeight:600 }}>
+                          Receipt
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {filteredSales.length===0 && <div style={{ padding:24, textAlign:'center', color:'#aaa', fontSize:13 }}>No sales found.</div>}
+            </div>
+          )}
         </div>
       </div>
 
@@ -1294,37 +1318,50 @@ function ExpensesPage({ expenses, onAdd, onDelete, isAdmin, netProfit, totalProf
 
   return (
     <div>
-      <div style={{ display:'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(auto-fit,minmax(200px,1fr))', gap: isMobile ? 8 : 16, marginBottom: isMobile ? 12 : 22 }}>
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? 'repeat(3,1fr)' : 'repeat(auto-fit,minmax(200px,1fr))', gap: isMobile ? 8 : 16, marginBottom: isMobile ? 12 : 22 }}>
         {[['Total Expenses', fmt(totalExp),    '#c62828', 'Recorded expenses'],
           ['Gross Profit',   fmt(totalProfit), '#2e7d32', 'Before expenses'],
           ['Net Profit',     fmt(netProfit),   netProfit>=0?'#558b2f':'#c62828', 'After expenses'],
-        ].map(([l,v,c,s])=>(
-          <div key={l} style={{ background:'#fff', borderRadius:12, padding: isMobile ? '12px 14px' : '18px 22px',
-                                boxShadow:'0 1px 8px rgba(0,0,0,0.06)', borderLeft:`4px solid ${c}` }}>
-            <div style={{ fontSize: isMobile ? 10 : 12, color:'#888', fontWeight:600 }}>{l}</div>
-            <div style={{ fontSize: isMobile ? 16 : 22, fontWeight:800, color:c, margin:'4px 0 2px' }}>{v}</div>
-            <div style={{ fontSize: isMobile ? 10 : 11, color:'#aaa' }}>{s}</div>
+        ].map(([l,v,col,s])=>(
+          <div key={l} style={{ background:'#fff', borderRadius:12, padding: isMobile ? '10px 10px' : '18px 22px',
+                                boxShadow:'0 1px 8px rgba(0,0,0,0.06)', borderLeft:`4px solid ${col}` }}>
+            <div style={{ fontSize: isMobile ? 9 : 12, color:'#888', fontWeight:600 }}>{l}</div>
+            <div style={{ fontSize: isMobile ? 13 : 22, fontWeight:800, color:col, margin:'4px 0 2px' }}>{v}</div>
+            <div style={{ fontSize: isMobile ? 9 : 11, color:'#aaa' }}>{s}</div>
           </div>
         ))}
-        <div style={{ background:'#fff', borderRadius:12, padding:'18px 22px',
-                      boxShadow:'0 1px 8px rgba(0,0,0,0.06)', borderLeft:'4px solid #1565c0' }}>
-          <div style={{ fontSize:12, color:'#888', fontWeight:600, marginBottom:6 }}>Formula</div>
-          <div style={{ fontFamily:'monospace', fontSize:12, color:'#333', lineHeight:1.8 }}>
-            net = gross − expenses<br/>
-            {fmt(totalProfit)} − {fmt(totalExp)} = <strong style={{ color: netProfit>=0?'#2e7d32':'#c62828' }}>{fmt(netProfit)}</strong>
+        {!isMobile && (
+          <div style={{ background:'#fff', borderRadius:12, padding:'18px 22px',
+                        boxShadow:'0 1px 8px rgba(0,0,0,0.06)', borderLeft:'4px solid #1565c0' }}>
+            <div style={{ fontSize:12, color:'#888', fontWeight:600, marginBottom:6 }}>Formula</div>
+            <div style={{ fontFamily:'monospace', fontSize:12, color:'#333', lineHeight:1.8 }}>
+              net = gross − expenses<br/>
+              {fmt(totalProfit)} − {fmt(totalExp)} = <strong style={{ color: netProfit>=0?'#2e7d32':'#c62828' }}>{fmt(netProfit)}</strong>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
+      {isMobile && (
+        <div style={{ background:'#fff', borderRadius:12, padding:'14px 16px', marginBottom:12,
+                      boxShadow:'0 1px 8px rgba(0,0,0,0.06)', borderLeft:'4px solid #1565c0' }}>
+          <div style={{ fontSize:13, fontWeight:700, color:'#1a3a2a', marginBottom:6 }}>Formula</div>
+          <div style={{ fontFamily:'monospace', fontSize:12, color:'#333', lineHeight:1.9 }}>
+            net = gross − expenses<br/>
+            {fmt(totalProfit)} − {fmt(totalExp)} =<br/>
+            <strong style={{ color: netProfit>=0?'#2e7d32':'#c62828', fontSize:14 }}>{fmt(netProfit)}</strong>
+          </div>
+        </div>
+      )}
       <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: isMobile ? 12 : 20 }}>
         <div>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
-            <h3 style={{ margin:0, fontSize:15, fontWeight:700, color:'#1a3a2a' }}>Expense Records</h3>
+            <h3 style={{ margin:0, fontSize: isMobile ? 14 : 15, fontWeight:700, color:'#1a3a2a' }}>Expense Records</h3>
             {isAdmin && <button onClick={()=>setShowForm(!showForm)}
-                                style={{ padding:'8px 16px', background:'#4caf50', color:'#fff', border:'none',
-                                         borderRadius:10, cursor:'pointer', fontSize:13, fontWeight:600,
+                                style={{ padding: isMobile ? '7px 14px' : '8px 16px', background:'#4caf50', color:'#fff', border:'none',
+                                         borderRadius:10, cursor:'pointer', fontSize: isMobile ? 12 : 13, fontWeight:600,
                                          display:'flex', alignItems:'center', gap:6 }}>
-              <Icon name="plus" size={14}/> Add Expense
+              <Icon name="plus" size={14}/> + Add Expense
             </button>}
           </div>
 
@@ -1360,34 +1397,66 @@ function ExpensesPage({ expenses, onAdd, onDelete, isAdmin, netProfit, totalProf
           )}
 
           <div style={{ background:'#fff', borderRadius:12, boxShadow:'0 1px 8px rgba(0,0,0,0.06)', overflow:'hidden' }}>
-            <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
-            <table style={{ width:'100%', borderCollapse:'collapse', fontSize: isMobile ? 11 : 13, minWidth: isMobile ? 380 : 'auto' }}>
-              <thead><tr style={{ background:'#f5f5f5' }}>
-                {['Date','Description','Amount',''].map(h=>
-                  <th key={h} style={{ padding:'10px 14px', textAlign:'left', fontWeight:700, color:'#444', fontSize:12 }}>{h}</th>)}
-              </tr></thead>
-              <tbody>
-                {expenses.map(e=>(
-                  <tr key={e.id} style={{ borderBottom:'1px solid #f5f5f5' }}>
-                    <td style={{ padding:'11px 14px', color:'#666' }}>{e.date}</td>
-                    <td style={{ padding:'11px 14px', color:'#333' }}>{e.description}</td>
-                    <td style={{ padding:'11px 14px', fontWeight:700, color:'#c62828' }}>{fmt(e.amount)}</td>
-                    <td style={{ padding:'11px 14px' }}>
-                      {isAdmin && <button onClick={()=>onDelete(e.id)}
-                                          style={{ background:'none', border:'none', cursor:'pointer', color:'#ef5350' }}>
-                        <Icon name="trash" size={14}/>
-                      </button>}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot><tr style={{ background:'#f9f9f9', borderTop:'2px solid #eee' }}>
-                <td colSpan={2} style={{ padding:'11px 14px', fontWeight:700, fontSize:13 }}>TOTAL</td>
-                <td style={{ padding:'11px 14px', fontWeight:800, color:'#c62828', fontSize:15 }}>{fmt(totalExp)}</td>
-                <td/>
-              </tr></tfoot>
-            </table>
-            </div>
+            {isMobile ? (
+              <div style={{ padding:'0 10px' }}>
+                <div style={{ display:'grid', gridTemplateColumns:'80px 1fr 80px 28px', gap:4,
+                              padding:'8px 0', borderBottom:'2px solid #eee' }}>
+                  {['Date','Description','Amount',''].map(h=>(
+                    <div key={h} style={{ fontSize:11, fontWeight:700, color:'#444' }}>{h}</div>
+                  ))}
+                </div>
+                {expenses.length===0
+                  ? <div style={{ padding:'16px 0', color:'#aaa', fontSize:13 }}>No expenses yet.</div>
+                  : expenses.map(e=>(
+                    <div key={e.id} style={{ display:'grid', gridTemplateColumns:'80px 1fr 80px 28px',
+                                             gap:4, padding:'9px 0', borderBottom:'1px solid #f5f5f5', alignItems:'center' }}>
+                      <div style={{ fontSize:11, color:'#666' }}>{e.date.substring(5)}</div>
+                      <div style={{ fontSize:11, color:'#333', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{e.description}</div>
+                      <div style={{ fontSize:12, fontWeight:700, color:'#c62828' }}>{fmt(e.amount)}</div>
+                      <div>{isAdmin && <button onClick={()=>onDelete(e.id)}
+                                          style={{ background:'none', border:'none', cursor:'pointer', color:'#ef5350', padding:0 }}>
+                        <Icon name="trash" size={13}/>
+                      </button>}</div>
+                    </div>
+                  ))
+                }
+                <div style={{ display:'grid', gridTemplateColumns:'80px 1fr 80px 28px',
+                              gap:4, padding:'9px 0', borderTop:'2px solid #eee' }}>
+                  <div style={{ fontSize:12, fontWeight:700, gridColumn:'1/3' }}>TOTAL</div>
+                  <div style={{ fontSize:13, fontWeight:800, color:'#c62828' }}>{fmt(totalExp)}</div>
+                  <div/>
+                </div>
+              </div>
+            ) : (
+              <div style={{ overflowX:'auto' }}>
+                <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
+                  <thead><tr style={{ background:'#f5f5f5' }}>
+                    {['Date','Description','Amount',''].map(h=>
+                      <th key={h} style={{ padding:'10px 14px', textAlign:'left', fontWeight:700, color:'#444', fontSize:12 }}>{h}</th>)}
+                  </tr></thead>
+                  <tbody>
+                    {expenses.map(e=>(
+                      <tr key={e.id} style={{ borderBottom:'1px solid #f5f5f5' }}>
+                        <td style={{ padding:'11px 14px', color:'#666' }}>{e.date}</td>
+                        <td style={{ padding:'11px 14px', color:'#333' }}>{e.description}</td>
+                        <td style={{ padding:'11px 14px', fontWeight:700, color:'#c62828' }}>{fmt(e.amount)}</td>
+                        <td style={{ padding:'11px 14px' }}>
+                          {isAdmin && <button onClick={()=>onDelete(e.id)}
+                                              style={{ background:'none', border:'none', cursor:'pointer', color:'#ef5350' }}>
+                            <Icon name="trash" size={14}/>
+                          </button>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot><tr style={{ background:'#f9f9f9', borderTop:'2px solid #eee' }}>
+                    <td colSpan={2} style={{ padding:'11px 14px', fontWeight:700, fontSize:13 }}>TOTAL</td>
+                    <td style={{ padding:'11px 14px', fontWeight:800, color:'#c62828', fontSize:15 }}>{fmt(totalExp)}</td>
+                    <td/>
+                  </tr></tfoot>
+                </table>
+              </div>
+            )}
           </div>
         </div>
 
