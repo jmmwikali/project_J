@@ -552,12 +552,12 @@ function Dashboard({ inventory, sales, expenses, lowStockItems, outOfStock,
               <div>net_profit = total_profit − total_expenses</div>
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8 }}>
-              {[['Gross Revenue',fmt(totalRevenue),'#1a3a2a'],
-                ['Gross Profit', fmt(totalProfit), '#1565c0'],
-                ['Net Profit',   fmt(netProfit),   netProfit>=0?'#558b2f':'#c62828']
-              ].map(([l,v,col]) => (
-                <div key={l} style={{ borderRadius:8, padding:'10px 8px' }}>
-                  <div style={{ fontSize:9, color:'#888', marginBottom:4, lineHeight:1.3 }}>{l}</div>
+              {[['Gross Revenue',fmt(totalRevenue),'#e8f5e9','#1a3a2a'],
+                ['Gross Profit', fmt(totalProfit), '#e3f2fd','#1565c0'],
+                ['Net Profit',   fmt(netProfit),   netProfit>=0?'#f1f8e9':'#ffebee', netProfit>=0?'#558b2f':'#c62828']
+              ].map(([l,v,bg,col]) => (
+                <div key={l} style={{ background:bg, borderRadius:8, padding:'10px 8px' }}>
+                  <div style={{ fontSize:9, color:'#666', marginBottom:4, lineHeight:1.3 }}>{l}</div>
                   <div style={{ fontWeight:800, fontSize:13, color:col }}>{v}</div>
                 </div>
               ))}
