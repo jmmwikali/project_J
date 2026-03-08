@@ -1141,6 +1141,25 @@ function SalesPage({ inventory, sales, onAddSale, onDeleteByDate, currentUser, s
   return (
     <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 340px', gap: isMobile ? 12 : 20, alignItems:'start' }}>
       <div>
+        {dateFilter && (() => {
+          const ds = sales.filter(s => s.date === dateFilter);
+          const dr = ds.reduce((a,s) => a + s.total_amount, 0);
+          const dp = ds.reduce((a,s) => a + s.total_profit, 0);
+          return (
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap: isMobile ? 8 : 12, marginBottom: isMobile ? 10 : 14 }}>
+              {[["Total Revenue", fmt(dr), '#e3f2fd', '#1565c0'],
+                ["Total Profit",  fmt(dp), '#e8f5e9', '#2e7d32'],
+                ["Total Sales",   ds.length, '#f3e5f5', '#6a1b9a']
+              ].map(([l,v,bg,cc]) => (
+                <div key={l} style={{ background:bg, borderRadius:12, padding: isMobile ? '12px 10px' : '14px 16px',
+                                      boxShadow:'0 1px 6px rgba(0,0,0,0.06)' }}>
+                  <div style={{ fontSize: isMobile ? 10 : 11, color:'#666', lineHeight:1.3, marginBottom:4 }}>{l}</div>
+                  <div style={{ fontWeight:800, color:cc, fontSize: isMobile ? 15 : 18 }}>{v}</div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
         <div style={{ background:'#fff', borderRadius:12, padding:20,
                       boxShadow:'0 1px 8px rgba(0,0,0,0.06)',
                       maxHeight: isMobile ? 500 : 'none', overflowY: isMobile ? 'auto' : 'visible' }}>
