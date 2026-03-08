@@ -540,45 +540,86 @@ function Dashboard({ inventory, sales, expenses, lowStockItems, outOfStock,
           </div>
         </div>
       )}
-      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: isMobile ? 12 : 20 }}>
-        <div style={{ background:'#fff', borderRadius:12, padding:22, boxShadow:'0 1px 8px rgba(0,0,0,0.06)' }}>
-          <h3 style={{ margin:'0 0 16px', fontSize:14, fontWeight:700, color:'#1a3a2a' }}>📊 Financial Overview</h3>
-          <div style={{ background:'#f9f9f9', borderRadius:10, padding:16, fontFamily:'monospace',
-                        fontSize:13, color:'#333', marginBottom:16, lineHeight:2 }}>
-            <div style={{ color:'#2e7d32', fontWeight:600 }}>Profit Formulas:</div>
-            <div>profit_per_unit = selling_price − cost_price</div>
-            <div>total_profit = profit_per_unit × quantity_sold</div>
-            <div>net_profit = total_profit − total_expenses</div>
+      {isMobile ? (
+        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+          <div style={{ background:'#fff', borderRadius:12, padding:'18px 16px', boxShadow:'0 1px 8px rgba(0,0,0,0.06)' }}>
+            <h3 style={{ margin:'0 0 14px', fontSize:15, fontWeight:800, color:'#1a3a2a' }}>📊 Financial Overview</h3>
+            <div style={{ background:'#f9f9f9', borderRadius:10, padding:'14px 16px', fontFamily:'monospace',
+                          fontSize:12, color:'#333', marginBottom:14, lineHeight:2.1 }}>
+              <div style={{ color:'#2e7d32', fontWeight:700, marginBottom:2 }}>Profit Formulas:</div>
+              <div>profit_per_unit = selling_price − cost_price</div>
+              <div>total_profit = profit_per_unit × quantity_sold</div>
+              <div>net_profit = total_profit − total_expenses</div>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8 }}>
+              {[['Gross Revenue',fmt(totalRevenue),'#1a3a2a'],
+                ['Gross Profit', fmt(totalProfit), '#1565c0'],
+                ['Net Profit',   fmt(netProfit),   netProfit>=0?'#558b2f':'#c62828']
+              ].map(([l,v,col]) => (
+                <div key={l} style={{ borderRadius:8, padding:'10px 8px' }}>
+                  <div style={{ fontSize:9, color:'#888', marginBottom:4, lineHeight:1.3 }}>{l}</div>
+                  <div style={{ fontWeight:800, fontSize:13, color:col }}>{v}</div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap: isMobile ? 8 : 12 }}>
-            {[['Gross Revenue',fmt(totalRevenue),'#e8f5e9','#1a3a2a'],
-              ['Gross Profit', fmt(totalProfit), '#e3f2fd','#1565c0'],
-              ['Net Profit',   fmt(netProfit),   netProfit>=0?'#f1f8e9':'#ffebee', netProfit>=0?'#558b2f':'#c62828']
-            ].map(([l,v,bg,col]) => (
-              <div key={l} style={{ background:bg, borderRadius:8, padding: isMobile ? '10px 8px' : '12px 16px' }}>
-                <div style={{ fontSize: isMobile ? 9 : 11, color:'#666', lineHeight:1.3, marginBottom:4 }}>{l}</div>
-                <div style={{ fontWeight: isMobile ? 800 : 700, fontSize: isMobile ? 13 : 16, color:col }}>{v}</div>
-              </div>
-            ))}
+          <div style={{ background:'#fff', borderRadius:12, padding:'18px 16px', boxShadow:'0 1px 8px rgba(0,0,0,0.06)' }}>
+            <h3 style={{ margin:'0 0 14px', fontSize:15, fontWeight:800, color:'#1a3a2a' }}>🏆 Top Selling Items</h3>
+            {topItems.length === 0
+              ? <div style={{ color:'#aaa', fontSize:13 }}>No sales data yet.</div>
+              : topItems.map(([name,qty],i) => (
+                <div key={name} style={{ display:'flex', alignItems:'center', gap:12,
+                                         padding:'9px 0', borderBottom: i<topItems.length-1 ? '1px solid #f5f5f5' : 'none' }}>
+                  <div style={{ width:28, height:28, borderRadius:'50%', flexShrink:0,
+                                background:['#4caf50','#2196f3','#ff9800','#9c27b0','#f44336'][i],
+                                color:'#fff', fontSize:13, fontWeight:700,
+                                display:'flex', alignItems:'center', justifyContent:'center' }}>{i+1}</div>
+                  <div style={{ flex:1, fontSize:13, color:'#333', fontWeight:500 }}>{name}</div>
+                  <div style={{ fontSize:13, fontWeight:700, color:'#4caf50' }}>{qty} sold</div>
+                </div>
+              ))}
           </div>
         </div>
-
-        <div style={{ background:'#fff', borderRadius:12, padding:22, boxShadow:'0 1px 8px rgba(0,0,0,0.06)' }}>
-          <h3 style={{ margin:'0 0 14px', fontSize:14, fontWeight:700, color:'#1a3a2a' }}>🏆 Top Selling Items</h3>
-          {topItems.length === 0
-            ? <div style={{ color:'#aaa', fontSize:13 }}>No sales data yet.</div>
-            : topItems.map(([name,qty],i) => (
-              <div key={name} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
-                <div style={{ width:22, height:22, borderRadius:'50%',
-                              background:['#4caf50','#2196f3','#ff9800','#9c27b0','#f44336'][i],
-                              color:'#fff', fontSize:11, fontWeight:700,
-                              display:'flex', alignItems:'center', justifyContent:'center' }}>{i+1}</div>
-                <div style={{ flex:1, fontSize:12, color:'#333' }}>{name}</div>
-                <div style={{ fontSize:12, fontWeight:700, color:'#4caf50' }}>{qty} sold</div>
-              </div>
-            ))}
+      ) : (
+        <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:20 }}>
+          <div style={{ background:'#fff', borderRadius:12, padding:22, boxShadow:'0 1px 8px rgba(0,0,0,0.06)' }}>
+            <h3 style={{ margin:'0 0 16px', fontSize:14, fontWeight:700, color:'#1a3a2a' }}>📊 Financial Overview</h3>
+            <div style={{ background:'#f9f9f9', borderRadius:10, padding:16, fontFamily:'monospace',
+                          fontSize:13, color:'#333', marginBottom:16, lineHeight:2 }}>
+              <div style={{ color:'#2e7d32', fontWeight:600 }}>Profit Formulas:</div>
+              <div>profit_per_unit = selling_price − cost_price</div>
+              <div>total_profit = profit_per_unit × quantity_sold</div>
+              <div>net_profit = total_profit − total_expenses</div>
+            </div>
+            <div style={{ display:'flex', gap:12 }}>
+              {[['Gross Revenue',fmt(totalRevenue),'#e8f5e9','#1a3a2a'],
+                ['Gross Profit', fmt(totalProfit), '#e3f2fd','#1565c0'],
+                ['Net Profit',   fmt(netProfit),   netProfit>=0?'#f1f8e9':'#ffebee', netProfit>=0?'#558b2f':'#c62828']
+              ].map(([l,v,bg,col]) => (
+                <div key={l} style={{ flex:1, background:bg, borderRadius:8, padding:'12px 16px' }}>
+                  <div style={{ fontSize:11, color:'#666' }}>{l}</div>
+                  <div style={{ fontWeight:700, fontSize:16, color:col }}>{v}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ background:'#fff', borderRadius:12, padding:22, boxShadow:'0 1px 8px rgba(0,0,0,0.06)' }}>
+            <h3 style={{ margin:'0 0 14px', fontSize:14, fontWeight:700, color:'#1a3a2a' }}>🏆 Top Selling Items</h3>
+            {topItems.length === 0
+              ? <div style={{ color:'#aaa', fontSize:13 }}>No sales data yet.</div>
+              : topItems.map(([name,qty],i) => (
+                <div key={name} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+                  <div style={{ width:22, height:22, borderRadius:'50%',
+                                background:['#4caf50','#2196f3','#ff9800','#9c27b0','#f44336'][i],
+                                color:'#fff', fontSize:11, fontWeight:700,
+                                display:'flex', alignItems:'center', justifyContent:'center' }}>{i+1}</div>
+                  <div style={{ flex:1, fontSize:12, color:'#333' }}>{name}</div>
+                  <div style={{ fontSize:12, fontWeight:700, color:'#4caf50' }}>{qty} sold</div>
+                </div>
+              ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {lowStockItems.length>0 && (
         <div style={{ marginTop:20, background:'#fff', borderRadius:12, padding:20,
@@ -1618,25 +1659,31 @@ function ReportsPage({ businessInfo }) {
       )}
 
       {report?.expenses_detail && (
-        <div style={{ background:'#fff', borderRadius:12, padding:22, boxShadow:'0 1px 8px rgba(0,0,0,0.06)' }}>
-          <h3 style={{ margin:'0 0 14px', fontSize:15, fontWeight:800, color:'#1a3a2a' }}>💳 Expense Breakdown</h3>
+        <div style={{ background:'#fff', borderRadius:12, padding:22, boxShadow:'0 1px 8px rgba(0,0,0,0.06)',
+                      maxHeight: window.innerWidth < 768 ? 360 : 'none',
+                      display:'flex', flexDirection:'column' }}>
+          <h3 style={{ margin:'0 0 14px', fontSize:15, fontWeight:800, color:'#1a3a2a', flexShrink:0 }}>💳 Expense Breakdown</h3>
           {report.expenses_detail.length===0
             ? <div style={{ color:'#aaa', fontSize:13 }}>No expenses for this period.</div>
-            : <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
-                <thead><tr style={{ background:'#f5f5f5' }}>
-                  {['Date','Description','Amount'].map(h=>
-                    <th key={h} style={{ padding:'9px 12px', textAlign:'left', fontWeight:700, color:'#444', fontSize:12 }}>{h}</th>)}
-                </tr></thead>
-                <tbody>
-                  {report.expenses_detail.map(e=>(
-                    <tr key={e.id} style={{ borderBottom:'1px solid #f5f5f5' }}>
-                      <td style={{ padding:'9px 12px', color:'#666' }}>{e.date}</td>
-                      <td style={{ padding:'9px 12px' }}>{e.description}</td>
-                      <td style={{ padding:'9px 12px', fontWeight:700, color:'#c62828' }}>{fmt(e.amount)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>}
+            : <div style={{ overflowY: window.innerWidth < 768 ? 'auto' : 'visible',
+                            overflowX:'auto', WebkitOverflowScrolling:'touch', flex:1 }}>
+                <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13,
+                                minWidth: window.innerWidth < 768 ? 300 : 'auto' }}>
+                  <thead><tr style={{ background:'#f5f5f5' }}>
+                    {['Date','Description','Amount'].map(h=>
+                      <th key={h} style={{ padding:'9px 12px', textAlign:'left', fontWeight:700, color:'#444', fontSize:12 }}>{h}</th>)}
+                  </tr></thead>
+                  <tbody>
+                    {report.expenses_detail.map(e=>(
+                      <tr key={e.id} style={{ borderBottom:'1px solid #f5f5f5' }}>
+                        <td style={{ padding:'9px 12px', color:'#666' }}>{e.date}</td>
+                        <td style={{ padding:'9px 12px' }}>{e.description}</td>
+                        <td style={{ padding:'9px 12px', fontWeight:700, color:'#c62828' }}>{fmt(e.amount)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>}
         </div>
       )}
     </div>
